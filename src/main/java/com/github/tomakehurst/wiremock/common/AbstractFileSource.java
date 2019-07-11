@@ -24,7 +24,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Iterables.transform;
@@ -33,6 +35,7 @@ import static com.google.common.collect.Lists.newArrayList;
 public abstract class AbstractFileSource implements FileSource {
 
     protected final File rootDirectory;
+    private final Map<String, BinaryFile> fileCache = new HashMap<>();
     
     public AbstractFileSource(File rootDirectory) {
         this.rootDirectory = rootDirectory;
@@ -43,13 +46,23 @@ public abstract class AbstractFileSource implements FileSource {
     @Override
     public BinaryFile getBinaryFileNamed(final String name) {
         assertFilePathIsUnderRoot(name);
-        return new BinaryFile(new File(rootDirectory, name).toURI());
+        if (fileCache != null) {
+            BinaryFile cached = fileCache.get(name);
+            if (cached != null) {
+                return cached;
+            }
+        }
+        BinaryFile binaryFile = new BinaryFile(new File(rootDirectory, name).toURI(), fileCache != null);
+        if (fileCache != null) {
+            fileCache.put(name, binaryFile);
+        }
+        return binaryFile;
     }
 
     @Override
     public TextFile getTextFileNamed(String name) {
         assertFilePathIsUnderRoot(name);
-        return new TextFile(new File(rootDirectory, name).toURI());
+        return new TextFile(getBinaryFileNamed(name));
     }
 
     @Override
@@ -94,7 +107,7 @@ public abstract class AbstractFileSource implements FileSource {
     private List<TextFile> toTextFileList(List<File> fileList) {
     	return newArrayList(transform(fileList, new Function<File, TextFile>() {
     		public TextFile apply(File input) {
-    			return new TextFile(input.toURI());
+    			return new TextFile(input.toURI(), false);
     		}
     	}));
     }

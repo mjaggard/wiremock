@@ -17,6 +17,7 @@ package com.github.tomakehurst.wiremock.common;
 
 import com.google.common.io.ByteStreams;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -25,14 +26,27 @@ import static com.github.tomakehurst.wiremock.common.Exceptions.throwUnchecked;
 
 public class BinaryFile implements InputStreamSource {
 
-	private URI uri;
+	private final URI uri;
+	private final boolean cachingEnabled;
+	private byte[] cachedBytes;
 
-	public BinaryFile(URI uri) {
+	public BinaryFile(URI uri, boolean cachingEnabled) {
 		this.uri = uri;
+		this.cachingEnabled = cachingEnabled;
 	}
 
 	public byte[] readContents() {
-		try(InputStream stream = getStream()) {
+		if (!cachingEnabled) {
+			return readContentsFromURL();
+		}
+		else if (cachedBytes == null) {
+			cachedBytes = readContentsFromURL();
+		}
+		return cachedBytes;
+	}
+
+	private byte[] readContentsFromURL() {
+		try(final InputStream stream = uri.toURL().openStream()) {
 			return ByteStreams.toByteArray(stream);
 		} catch (final IOException ioe) {
 			return throwUnchecked(ioe, byte[].class);
@@ -54,6 +68,9 @@ public class BinaryFile implements InputStreamSource {
 
 	@Override
 	public InputStream getStream() {
+		if (cachingEnabled) {
+			return new ByteArrayInputStream(readContents());
+		}
 		try {
 			return uri.toURL().openStream();
 		} catch (IOException e) {

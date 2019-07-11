@@ -99,6 +99,11 @@ public class WarConfiguration implements Options {
     }
 
     @Override
+    public boolean fileCachingEnabled() {
+        return false;
+    }
+
+    @Override
     public boolean requestJournalDisabled() {
         return false;
     }

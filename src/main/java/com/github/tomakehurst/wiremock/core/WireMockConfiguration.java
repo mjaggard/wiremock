@@ -69,6 +69,7 @@ public class WireMockConfiguration implements Options {
     private MappingsSource mappingsSource;
 
     private Notifier notifier = new Slf4jNotifier(false);
+    private boolean fileCachingEnabled = false;
     private boolean requestJournalDisabled = false;
     private Optional<Integer> maxRequestJournalEntries = Optional.absent();
     private List<CaseInsensitiveKey> matchingHeaders = emptyList();
@@ -238,6 +239,11 @@ public class WireMockConfiguration implements Options {
         return this;
     }
 
+    public WireMockConfiguration enableFileCaching() {
+        fileCachingEnabled = true;
+        return this;
+    }
+
     public WireMockConfiguration disableRequestJournal() {
         requestJournalDisabled = true;
         return this;
@@ -398,6 +404,10 @@ public class WireMockConfiguration implements Options {
     @Override
     public Notifier notifier() {
         return notifier;
+    }
+
+    public boolean fileCachingEnabled() {
+        return fileCachingEnabled;
     }
 
     @Override

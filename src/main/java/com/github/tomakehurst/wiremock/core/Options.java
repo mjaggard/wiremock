@@ -53,6 +53,7 @@ public interface Options {
     MappingsLoader mappingsLoader();
     MappingsSaver mappingsSaver();
     Notifier notifier();
+    boolean fileCachingEnabled();
     boolean requestJournalDisabled();
     Optional<Integer> maxRequestJournalEntries();
     String bindAddress();

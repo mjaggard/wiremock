@@ -20,17 +20,23 @@ import java.net.URI;
 
 import static com.google.common.base.Charsets.UTF_8;
 
-public class TextFile extends BinaryFile {
+public class TextFile {
 
-	public TextFile(URI uri) {
-        super(uri);
+    private final BinaryFile binaryFile;
+
+	public TextFile(URI uri, boolean cachingEnabled) {
+        binaryFile = new BinaryFile(uri, cachingEnabled);
 	}
+
+	public TextFile(BinaryFile binaryFile) {
+	    this.binaryFile = binaryFile;
+    }
 	
 	public String readContentsAsString() {
-        return new String(super.readContents(), UTF_8);
+        return new String(binaryFile.readContents(), UTF_8);
 	}
 
     public String getPath() {
-        return new File(getUri().getSchemeSpecificPart()).getPath();
+        return new File(binaryFile.getUri().getSchemeSpecificPart()).getPath();
     }
 }
